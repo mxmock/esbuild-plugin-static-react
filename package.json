@@ -1,0 +1,51 @@
+{
+  "name": "esbuild-plugin-static-react",
+  "version": "0.0.1",
+  "description": "An esbuild plugin to generate react components html and insert it in a main html file",
+  "main": "index.js",
+  "scripts": {
+    "esbuild": "node esbuild.mjs",
+    "dev": "node docker/dev.mjs"
+  },
+  "bin": {
+    "build": "build.js"
+  },
+  "keywords": [
+    "esbuild",
+    "plugin",
+    "react",
+    "html",
+    "static",
+    "hydration"
+  ],
+  "author": "ockode",
+  "license": "ISC",
+  "files": [
+    "index.js"
+  ],
+  "exports": {
+    ".": "./index.js"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@reduxjs/toolkit": "^2.0.1",
+    "@types/html-minifier-terser": "^7.0.2",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.18",
+    "@types/react-dom": "^18.2.18",
+    "esbuild": "^0.19.11",
+    "esbuild-plugin-css-opti": "0.1.2",
+    "react-redux": "9.1.0"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.13",
+    "cssnano": "^6.0.3",
+    "cssnano-preset-default": "^6.0.3",
+    "html-minifier-terser": "^7.2.0",
+    "postcss": "^8.4.33",
+    "sass": "^1.70.0"
+  }
+}

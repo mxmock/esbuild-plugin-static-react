@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    // "rootDir": "src",
+    // "module": "ESNext",
+    // "moduleResolution": "Bundler",
+    "typeRoots": ["./node_modules/@types"],
+    "paths": { "#*": ["./src/*"] },
+
+    "target": "es5",
+    // "emitDecoratorMetadata": true,
+    // "experimentalDecorators": true,
+    "lib": ["es2022", "es5"],
+
+    "strict": true,
+
+    "skipLibCheck": true,
+    "allowJs": true,
+
+    "esModuleInterop": true,
+    // recommanded
+    "noEmit": true,
+    // "emitDeclarationOnly": true
+    "allowImportingTsExtensions": true,
+    "allowArbitraryExtensions": true,
+    "jsx": "react-jsx"
+    // "verbatimModuleSyntax": true // or `isolatedModules`
+  },
+  "exclude": ["./node_modules/**/*"]
+}
