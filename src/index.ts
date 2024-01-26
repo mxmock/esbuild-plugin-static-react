@@ -24,10 +24,12 @@ const staticReactPlugin = (options: any = {}) => {
 
       build.onStart(async () => {
         await deleteFolder(outDir);
+        console.log("Create optimized css...");
         await buildCss(cssFilename, cssDir, srcDir, outDir);
       });
 
       build.onEnd(async () => {
+        console.log("Reading pages...\n");
         const pages = await readPages(Path.resolve(srcDir, pagesDir));
 
         const folders = await readFolders(
@@ -35,15 +37,24 @@ const staticReactPlugin = (options: any = {}) => {
           Path.resolve(outDir, cssDir)
         );
 
+        const logs: string[] = [];
+
         const toWrite = pages.map((page) => {
           for (let component of components) {
-            page.content = injectComponent(component, page.content, store);
+            const pageName = Path.basename(page.path);
+            const { html, log } = injectComponent(component, page.content, pageName, store);
+            if (stringIsFilled(log)) logs.push(log);
+            page.content = html;
           }
           page.path = getPagesOutDir(outDir, pagesDir, page.path);
           page.content = replaceTags(page, folders);
           return writePage(page);
         });
 
+        const log = logs.reduce((prev, l) => `${prev}\n${l}`, `Injected components:`);
+
+        console.log(`${log}\n`);
+        console.log("Creating optimized html...");
         await Promise.all(toWrite);
       });
     },

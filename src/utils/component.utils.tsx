@@ -1,12 +1,17 @@
 import { Provider } from "react-redux";
 import { renderToString } from "react-dom/server";
 
-export const injectComponent = (component: Component, page: string, store: any) => {
+export const injectComponent = (
+  component: Component,
+  page: string,
+  pageName: string,
+  store: any
+) => {
   const { id, Content } = component;
 
   const htmlId = `id="${id}"`;
   const htmlData = `data-${id}=`;
-  if (!page.includes(htmlId)) return page;
+  if (!page.includes(htmlId)) return { log: "", html: page };
 
   const idIndex = page.indexOf(htmlId);
   const data = getComponentData(page, htmlData, idIndex);
@@ -20,8 +25,10 @@ export const injectComponent = (component: Component, page: string, store: any) 
   );
 
   const htmlComponent = renderToString(jsx);
+  const l = `${id} injected in ${pageName}`;
+  const log = data && Object.keys(data).length > 0 ? `${l} with data ${JSON.stringify(data)}` : l;
 
-  return getInjectedHtml(htmlComponent, page, idIndex, htmlId.length + 1);
+  return { log, html: getInjectedHtml(htmlComponent, page, idIndex, htmlId.length + 1) };
 };
 
 const getComponentData = (htmlContent: string, htmlData: string, idIndex: number) => {
@@ -30,9 +37,7 @@ const getComponentData = (htmlContent: string, htmlData: string, idIndex: number
   const dataEndAt = idIndex - 2;
   const data = htmlContent.substring(dataStartAt, dataEndAt);
   try {
-    const parsed = JSON.parse(data);
-    console.log(`${htmlData}`, parsed);
-    return parsed;
+    return JSON.parse(data);
   } catch (e: any) {
     console.error(`getComponentData - cannot parse ${data} from html:`, e.message);
     return {};
