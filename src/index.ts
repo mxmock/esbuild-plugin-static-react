@@ -52,7 +52,7 @@ const staticReactPlugin = (options: any = {}) => {
         });
 
         const log = logs.reduce(
-          (prev, l, i) => (i === 0 ? l : `${prev}, ${l}`),
+          (prev, l, i) => (i === 0 ? `${prev} ${l}` : `${prev}, ${l}`),
           `Injected components:`
         );
 
