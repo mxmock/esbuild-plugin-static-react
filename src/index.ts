@@ -29,7 +29,7 @@ const staticReactPlugin = (options: any = {}) => {
       });
 
       build.onEnd(async () => {
-        console.log("Reading pages...\n");
+        console.log("Reading pages...");
         const pages = await readPages(Path.resolve(srcDir, pagesDir));
 
         const folders = await readFolders(
@@ -51,9 +51,12 @@ const staticReactPlugin = (options: any = {}) => {
           return writePage(page);
         });
 
-        const log = logs.reduce((prev, l) => `${prev}\n${l}`, `Injected components:`);
+        const log = logs.reduce(
+          (prev, l, i) => (i === 0 ? l : `${prev}, ${l}`),
+          `Injected components:`
+        );
 
-        console.log(`${log}\n`);
+        console.log(`${log}`);
         console.log("Creating optimized html...");
         await Promise.all(toWrite);
       });
