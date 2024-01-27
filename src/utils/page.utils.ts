@@ -7,9 +7,44 @@ export const getPagesOutDir = (outDir: string, pagesDir: string, pagePath: strin
   return Path.join(outDir, sliced);
 };
 
-export const replaceTags = (page: Page, folders: { jsFolder: Dirent[]; cssFolder: Dirent[] }) => {
+const getRelativePath = (url1: string, url2: string) => {
+  const relativePath = Path.relative(Path.dirname(url1), Path.dirname(url2));
+  return `${relativePath}/${Path.basename(url2)}`;
+};
+
+const replaceAssetsPaths = (
+  content: string,
+  pageSrcPath: string,
+  pageOutPath: string,
+  assetsSrcFolder: Dirent[],
+  assetsOutFolder: Dirent[]
+) => {
+  let updatedContent = content;
+
+  for (let i = 0; i < assetsSrcFolder.length; i++) {
+    const assetSrc = assetsSrcFolder[i];
+    const assetOut = assetsOutFolder[i];
+    if (
+      assetSrc.name.includes(".") &&
+      assetOut.name.includes(".") &&
+      updatedContent.includes(assetSrc.name)
+    ) {
+      const assetSrcPath = Path.resolve(assetSrc.path, assetSrc.name);
+      const assetOutPath = Path.resolve(assetOut.path, assetOut.name);
+
+      const relSrcPath = getRelativePath(pageSrcPath, assetSrcPath);
+      const relOutPath = getRelativePath(pageOutPath, assetOutPath);
+
+      updatedContent = updatedContent.replace(relSrcPath, relOutPath);
+    }
+  }
+
+  return updatedContent;
+};
+
+export const replaceTags = (page: Page, pageSrcPath: string, folders: Folders) => {
   const { content, path } = page;
-  const { jsFolder, cssFolder } = folders;
+  const { jsFolder, cssFolder, assetsSrcFolder, assetsOutFolder } = folders;
 
   let updatedContent = removeScriptsAndLinks(content);
 
@@ -17,7 +52,9 @@ export const replaceTags = (page: Page, folders: { jsFolder: Dirent[]; cssFolder
   const links = cssFolder.reduce(buildLinks(path), "");
 
   updatedContent = updatedContent.replace(" </head>", `${links}</head>`);
-  return updatedContent.replace(" </body>", `${scripts}</body>`);
+  updatedContent = updatedContent.replace(" </body>", `${scripts}</body>`);
+
+  return replaceAssetsPaths(updatedContent, pageSrcPath, path, assetsSrcFolder, assetsOutFolder);
 };
 
 const removeScriptsAndLinks = (content: string) => {

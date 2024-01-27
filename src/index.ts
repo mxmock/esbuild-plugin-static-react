@@ -4,8 +4,8 @@ import { writePage } from "./utils/stream.utils";
 import { deleteFolder } from "./utils/files.utils";
 import { stringIsFilled } from "./utils/string.utils";
 import { injectComponent } from "./utils/component.utils";
-import { readFolders, readPages } from "./utils/reader.utils";
 import { getPagesOutDir, replaceTags } from "./utils/page.utils";
+import { copyAssets, readFolders, readPages } from "./utils/reader.utils";
 
 const staticReactPlugin = (options: any = {}) => {
   return {
@@ -15,6 +15,7 @@ const staticReactPlugin = (options: any = {}) => {
 
       const cssDir = options.css?.dir;
       const store = options.store || null;
+      const assetsDir = options.assetsDir;
       const cssFilename = options.css?.name;
       const pagesDir = buildPath(options.pagesDir);
       const jsOutDir = buildPath(options.jsOutDir);
@@ -22,22 +23,21 @@ const staticReactPlugin = (options: any = {}) => {
       const components: Component[] = options.components || [];
       const outDir = buildPath(options.outDir || "build", CURRENT_DIR);
 
+      let pages: Page[] = [];
+
       build.onStart(async () => {
         await deleteFolder(outDir);
-        console.log("Create optimized css...");
+
+        pages = await readPages(Path.resolve(srcDir, pagesDir));
+
+        await copyAssets(assetsDir, srcDir, outDir);
         await buildCss(cssFilename, cssDir, srcDir, outDir);
       });
 
       build.onEnd(async () => {
-        console.log("Reading pages...");
-        const pages = await readPages(Path.resolve(srcDir, pagesDir));
-
-        const folders = await readFolders(
-          Path.resolve(outDir, jsOutDir),
-          Path.resolve(outDir, cssDir)
-        );
-
         const logs: string[] = [];
+
+        const folders = await readFolders(outDir, srcDir, jsOutDir, cssDir, assetsDir);
 
         const toWrite = pages.map((page) => {
           for (let component of components) {
@@ -46,19 +46,27 @@ const staticReactPlugin = (options: any = {}) => {
             if (stringIsFilled(log)) logs.push(log);
             page.content = html;
           }
+          const pageSrcPath = page.path;
           page.path = getPagesOutDir(outDir, pagesDir, page.path);
-          page.content = replaceTags(page, folders);
+          page.content = replaceTags(page, pageSrcPath, folders);
           return writePage(page);
         });
 
-        const log = logs.reduce(
-          (prev, l, i) => (i === 0 ? `${prev} ${l}` : `${prev}, ${l}`),
-          `Injected components:`
-        );
+        const log = !logs.length
+          ? "No component injected"
+          : logs.reduce(
+              (prev, l, i) => (i === 0 ? `${prev} ${l}` : `${prev}, ${l}`),
+              `Injected components:`
+            );
 
         console.log(`${log}`);
+        console.log("");
+
         console.log("Creating optimized html...");
+        console.time("Html files wrote in");
         await Promise.all(toWrite);
+        console.timeEnd("Html files wrote in");
+        console.log("");
       });
     },
   };

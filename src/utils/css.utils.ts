@@ -1,5 +1,5 @@
 import Path from "path";
-import sass from "sass";
+import * as sass from "sass";
 import postcss from "postcss";
 import cssnano from "cssnano";
 import autoprefixer from "autoprefixer";
@@ -14,6 +14,8 @@ export const buildCss = async (
   outDir: string
 ) => {
   if (!stringIsFilled(cssFilename) || !stringIsFilled(cssDir)) return;
+  console.log("Create optimized css...");
+  console.time("Css created in");
 
   const preset = defaultPreset();
   const cssSrcPath = Path.join(srcDir, cssDir, cssFilename);
@@ -29,6 +31,8 @@ export const buildCss = async (
     const cssOutPath = Path.join(outDir, cssDir, scssToCss);
 
     await writeCss(cssOutPath, `${optimized.css}`);
+    console.timeEnd("Css created in");
+    console.log("");
   } catch (e: any) {
     console.error(e.message);
   }

@@ -1,6 +1,8 @@
 import Path from "path";
 import { Dirent, readdir } from "fs";
+import { copyFolder } from "./files.utils";
 import { streamPage } from "./stream.utils";
+import { stringIsFilled } from "./string.utils";
 
 export const readFolder = (dirPath: string): Promise<Dirent[]> => {
   return new Promise((resolve, reject) => {
@@ -11,13 +13,34 @@ export const readFolder = (dirPath: string): Promise<Dirent[]> => {
   });
 };
 
-export const readFolders = async (jsOutDir: string, cssOutDir: string) => {
-  const jsFolder = await readFolder(jsOutDir);
-  const cssFolder = await readFolder(cssOutDir);
-  return { jsFolder, cssFolder };
+export const readFolders = async (
+  outDir: string,
+  srcDir: string,
+  jsOutDir: string,
+  cssDir: string,
+  assetsDir: string
+): Promise<Folders> => {
+  console.log("Reading folders...");
+  console.time("Folders read in");
+
+  const js = Path.resolve(outDir, jsOutDir);
+  const css = stringIsFilled(cssDir) ? Path.resolve(outDir, cssDir) : null;
+  const assetsSrc = stringIsFilled(assetsDir) ? Path.resolve(srcDir, assetsDir) : null;
+  const assetsOut = stringIsFilled(assetsDir) ? Path.resolve(outDir, assetsDir) : null;
+
+  const jsFolder = await readFolder(js);
+  const cssFolder = css ? await readFolder(css) : [];
+  const assetsSrcFolder = assetsSrc ? await readFolder(assetsSrc) : [];
+  const assetsOutFolder = assetsOut ? await readFolder(assetsOut) : [];
+
+  console.timeEnd("Folders read in");
+  console.log("");
+  return { jsFolder, cssFolder, assetsSrcFolder, assetsOutFolder };
 };
 
 export const readPages = async (pagesPath: string) => {
+  console.log("Reading pages...");
+  console.time("Pages read in");
   let pages: Page[] = [];
 
   try {
@@ -32,9 +55,20 @@ export const readPages = async (pagesPath: string) => {
       });
 
     pages = await Promise.all(pagesPromises);
+    console.timeEnd("Pages read in");
+    console.log("");
   } catch (e) {
     console.error(e);
   } finally {
     return pages;
   }
+};
+
+export const copyAssets = async (assetsDir: string, srcDir: string, outDir: string) => {
+  if (!stringIsFilled(assetsDir)) return;
+  console.log("Copying assets...");
+  console.time("Assets copied in");
+  await copyFolder(Path.resolve(srcDir, assetsDir), Path.resolve(outDir, assetsDir));
+  console.timeEnd("Assets copied in");
+  console.log("");
 };
