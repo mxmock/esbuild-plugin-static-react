@@ -1,16 +1,22 @@
-type Page = {
+interface PluginOpts {
+  store: any;
+  srcDir: string;
+  outDir?: string;
+  pagesDir: string;
+  components?: Component[];
+}
+
+interface Page {
   path: string;
   content: string;
-};
+}
 
-type Component = {
+interface Component {
   id: string;
   Content: function;
-};
+}
 
-type Folders = {
-  jsFolder: Dirent[];
-  cssFolder: Dirent[];
+interface Folders {
   assetsSrcFolder: Dirent[];
   assetsOutFolder: Dirent[];
-};
+}

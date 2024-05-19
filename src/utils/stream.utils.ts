@@ -41,9 +41,8 @@ export const streamPage = async (path: string): Promise<Page> => {
     });
   } catch (e: any) {
     console.error(e.message);
-  } finally {
-    return { path, content };
   }
+  return { path, content };
 };
 
 export const writePage = async (page: Page) => {
@@ -52,16 +51,6 @@ export const writePage = async (page: Page) => {
     const stream = createWriteStream(page.path);
     await writeStream(stream, page.content);
   } catch (e: any) {
-    console.log(e);
-  }
-};
-
-export const writeCss = async (path: string, data: string) => {
-  try {
-    await createFolder(Path.dirname(path));
-    const stream = createWriteStream(path);
-    await writeStream(stream, data);
-  } catch (e) {
     console.log(e);
   }
 };

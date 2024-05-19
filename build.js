@@ -7,6 +7,7 @@ const build = async (path) => {
   const r = await esbuild.build({
     entryPoints: [path],
     bundle: true,
+    outdir: "./",
     jsx: "automatic",
     loader: { ".js": "jsx" },
     platform: "node",

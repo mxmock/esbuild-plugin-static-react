@@ -14,28 +14,22 @@ export const readFolder = (dirPath: string): Promise<Dirent[]> => {
 };
 
 export const readFolders = async (
-  outDir: string,
-  srcDir: string,
-  jsOutDir: string,
-  cssDir: string,
-  assetsDir: string
+    outDir: string,
+    srcDir: string,
+    assetsDir: string,
 ): Promise<Folders> => {
   console.log("Reading folders...");
   console.time("Folders read in");
 
-  const js = Path.resolve(outDir, jsOutDir);
-  const css = stringIsFilled(cssDir) ? Path.resolve(outDir, cssDir) : null;
   const assetsSrc = stringIsFilled(assetsDir) ? Path.resolve(srcDir, assetsDir) : null;
   const assetsOut = stringIsFilled(assetsDir) ? Path.resolve(outDir, assetsDir) : null;
 
-  const jsFolder = await readFolder(js);
-  const cssFolder = css ? await readFolder(css) : [];
   const assetsSrcFolder = assetsSrc ? await readFolder(assetsSrc) : [];
   const assetsOutFolder = assetsOut ? await readFolder(assetsOut) : [];
 
   console.timeEnd("Folders read in");
   console.log("");
-  return { jsFolder, cssFolder, assetsSrcFolder, assetsOutFolder };
+  return { assetsSrcFolder, assetsOutFolder };
 };
 
 export const readPages = async (pagesPath: string) => {
@@ -48,20 +42,19 @@ export const readPages = async (pagesPath: string) => {
 
     const dirContent = await readFolder(dirPath);
     const pagesPromises = dirContent
-      .filter((d) => d.name.includes(".html"))
-      .map((d) => {
-        const p = Path.resolve(d.path, d.name);
-        return streamPage(p);
-      });
+        .filter((d) => d.name.includes(".html"))
+        .map((d) => {
+          const p = Path.resolve(d.path, d.name);
+          return streamPage(p);
+        });
 
     pages = await Promise.all(pagesPromises);
     console.timeEnd("Pages read in");
     console.log("");
   } catch (e) {
     console.error(e);
-  } finally {
-    return pages;
   }
+  return pages;
 };
 
 export const copyAssets = async (assetsDir: string, srcDir: string, outDir: string) => {
