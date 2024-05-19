@@ -27,8 +27,8 @@ const replaceAssetsPaths = (
     const copiedAsset = assetsOutFolder.find((a) => a.name === fileName);
 
     if (!!copiedAsset && fileName.includes(".") && updatedContent.includes(fileName)) {
-      const assetSrcPath = Path.resolve(assetSrc.parentPath, assetSrc.name);
-      const assetOutPath = Path.resolve(copiedAsset.parentPath, copiedAsset.name);
+      const assetSrcPath = Path.resolve(assetSrc.parentPath || assetSrc.path, assetSrc.name);
+      const assetOutPath = Path.resolve(copiedAsset.parentPath || copiedAsset.path, copiedAsset.name);
 
       const relSrcPath = getRelativePath(pageSrcPath, assetSrcPath);
       const relOutPath = getRelativePath(pageOutPath, assetOutPath);
@@ -63,7 +63,7 @@ const removeScriptsAndLinks = (content: string) => {
 
 const buildScripts = (pagePath: string) => (prev: string, d: Dirent) => {
   if (!d.name.includes(".js")) return prev;
-  const relPath = Path.relative(Path.dirname(pagePath), d.parentPath);
+  const relPath = Path.relative(Path.dirname(pagePath), d.parentPath || d.path);
   const finalPath = Path.join(relPath, d.name);
   const script = `<script defer async src="${finalPath}"></script>`;
   return `${prev}${script} `;
@@ -71,7 +71,7 @@ const buildScripts = (pagePath: string) => (prev: string, d: Dirent) => {
 
 const buildLinks = (pagePath: string) => (prev: string, d: Dirent) => {
   if (!d.name.includes(".css")) return prev;
-  const relPath = Path.relative(Path.dirname(pagePath), d.parentPath);
+  const relPath = Path.relative(Path.dirname(pagePath), d.parentPath || d.path);
   const finalPath = Path.join(relPath, d.name);
   const link = `<link rel="stylesheet" href="${finalPath}">`;
   return `${prev}${link} `;
