@@ -18,7 +18,8 @@ const build = async (path) => {
     pure: ["console"],
     write: false,
   });
-  return String.fromCharCode.apply(null, r.outputFiles[0].contents);
+  const uint8array = (r.outputFiles[0].contents);
+  return new TextDecoder().decode(uint8array);
 };
 
 build(path)
